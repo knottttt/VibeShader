@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"font-color","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"d9cb13c8-8e39-43b7-afb1-a8a6f918c1ab","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true,"IS_GRAY":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

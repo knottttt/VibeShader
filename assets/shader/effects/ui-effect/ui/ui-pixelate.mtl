@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-pixelate","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"056f6253-e189-4b38-a998-f1bf54b01d74","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

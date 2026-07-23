@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-detail","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"f8fc5360-7472-4d85-ac9d-1d89dc448d1c","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

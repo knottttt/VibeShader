@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-composite","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"988d52b7-dbbe-4bee-84d3-ec96e99e350a","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

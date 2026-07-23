@@ -1,0 +1,108 @@
+CCEffect %{
+  techniques:
+  - name: transparent
+    passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState: { depthTest: false, depthWrite: false }
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState: { cullMode: none }
+      properties:
+        gradationColorA: { value: [1, 1, 1, 1], editor: { type: color } }
+        gradationColorB: { value: [0, 0.82, 1, 1], editor: { type: color } }
+        gradationModeN: { value: 0 }
+        angleN: { value: 0 }
+        tilingN: { value: 1 }
+        gradationOffsetN: { value: 0 }
+        widthN: { value: 0.25 }
+        softnessN: { value: 0.05 }
+        speedN: { value: 0.5 }
+        runtimeTimeN: { value: 0 }
+        intensityN: { value: 1 }
+        spriteSizeN: { value: [100, 100] }
+        spriteAnchorN: { value: [0.5, 0.5] }
+        alphaThreshold: { value: 0.001 }
+}%
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common/common-define>
+  #endif
+  in vec3 a_position; in vec2 a_texCoord; in vec4 a_color;
+  out vec2 uv0; out vec2 localPos0; out vec4 color;
+  vec4 vert () {
+    vec4 pos = vec4(a_position, 1.0);
+    #if USE_LOCAL
+      pos = cc_matWorld * pos;
+    #endif
+    pos = cc_matViewProj * pos;
+    uv0 = a_texCoord; localPos0 = a_position.xy; color = a_color;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    return pos;
+  }
+}%
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/internal/embedded-alpha>
+  #include <builtin/internal/alpha-test>
+  in vec2 uv0; in vec2 localPos0; in vec4 color;
+  #if USE_TEXTURE
+    #pragma builtin(local)
+    layout(set = 2, binding = 12) uniform sampler2D cc_spriteTexture;
+  #endif
+  uniform Constant {
+    vec4 gradationColorA;
+    vec4 gradationColorB;
+    vec2 spriteSizeN;
+    vec2 spriteAnchorN;
+    float gradationModeN;
+    float angleN;
+    float tilingN;
+    float gradationOffsetN;
+    float widthN;
+    float softnessN;
+    float speedN;
+    float runtimeTimeN;
+    float intensityN;
+  };
+  vec3 hsv2rgb(vec3 c) {
+    vec3 p = abs(fract(c.xxx + vec3(0.0, 0.6666667, 0.3333333)) * 6.0 - 3.0);
+    return c.z * mix(vec3(1.0), clamp(p - 1.0, 0.0, 1.0), c.y);
+  }
+  float coordinateN(vec2 p) {
+    if (gradationModeN < 0.5) return p.x;
+    if (gradationModeN < 1.5) return p.y;
+    if (gradationModeN < 2.5) { float r = radians(angleN); return dot(p - vec2(0.5), vec2(cos(r), sin(r))) + 0.5; }
+    if (gradationModeN < 3.5) return length(p - vec2(0.5)) * 1.4142136;
+    float r = radians(angleN); return dot(p - vec2(0.5), vec2(cos(r), sin(r))) + 0.5;
+  }
+  vec4 frag () {
+    vec4 tex = vec4(1.0);
+    #if USE_TEXTURE
+      tex = CCSampleWithAlphaSeparated(cc_spriteTexture, uv0);
+      #if IS_GRAY
+        tex.rgb = vec3(dot(tex.rgb, vec3(0.2126, 0.7152, 0.0722)));
+      #endif
+    #endif
+    vec4 o = tex * color;
+    vec2 localUv = localPos0 / max(spriteSizeN, vec2(0.0001)) + spriteAnchorN;
+    float coord = coordinateN(localUv);
+    float phase = fract(coord * max(tilingN, 0.0001) + gradationOffsetN - runtimeTimeN * speedN);
+    float band = 1.0 - smoothstep(widthN, widthN + max(softnessN, 0.0001), abs(phase - 0.5));
+    vec3 gradientColor = gradationModeN > 3.5 ? hsv2rgb(vec3(phase, 1.0, 1.0)) : mix(gradationColorA.rgb, gradationColorB.rgb, clamp(coord, 0.0, 1.0));
+    o.rgb = mix(o.rgb, o.rgb * gradientColor + gradientColor * band, clamp(intensityN, 0.0, 1.0));
+    ALPHA_TEST(o); return o;
+  }
+}%

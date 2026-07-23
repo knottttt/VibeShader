@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-rgb-shift","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"491517d4-3a93-4b9e-9c30-a8114b7e734a","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

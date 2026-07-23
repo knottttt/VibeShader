@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-transition","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"045245e6-10d0-4578-b37b-1b5dce767ad2","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

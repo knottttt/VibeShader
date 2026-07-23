@@ -1,0 +1,107 @@
+CCEffect %{
+  techniques:
+  - name: transparent
+    passes:
+    - vert: sprite-vs:vert
+      frag: sprite-fs:frag
+      depthStencilState: { depthTest: false, depthWrite: false }
+      blendState:
+        targets:
+        - blend: true
+          blendSrc: src_alpha
+          blendDst: one_minus_src_alpha
+          blendSrcAlpha: src_alpha
+          blendDstAlpha: one_minus_src_alpha
+      rasterizerState: { cullMode: none }
+      properties:
+        transitionTexture: { value: white }
+        effectColor: { value: [1, 1, 1, 1], editor: { type: color } }
+        transitionColor: { value: [1, 1, 1, 1], editor: { type: color } }
+        gradationColorA: { value: [1, 1, 1, 1], editor: { type: color } }
+        gradationColorB: { value: [0, 0.82, 1, 1], editor: { type: color } }
+        toneModeN: { value: 0 }
+        toneIntensityN: { value: 1 }
+        colorModeN: { value: 0 }
+        colorIntensityN: { value: 1 }
+        transitionModeN: { value: 0 }
+        transitionRateN: { value: 0 }
+        transitionWidthN: { value: 0.1 }
+        transitionSoftnessN: { value: 0.02 }
+        hasTransitionTextureN: { value: 0 }
+        gradationModeN: { value: 0 }
+        angleN: { value: 0 }
+        tilingN: { value: 1 }
+        gradationOffsetN: { value: 0 }
+        widthN: { value: 0.25 }
+        softnessN: { value: 0.05 }
+        speedN: { value: 0.5 }
+        runtimeTimeN: { value: 0 }
+        intensityN: { value: 1 }
+        targetModeN: { value: 0 }
+        targetValueN: { value: 0.5 }
+        targetRangeN: { value: 1 }
+        targetSoftnessN: { value: 0.1 }
+        spriteSizeN: { value: [100, 100] }
+        spriteAnchorN: { value: [0.5, 0.5] }
+        alphaThreshold: { value: 0.001 }
+}%
+CCProgram sprite-vs %{
+  precision highp float;
+  #include <builtin/uniforms/cc-global>
+  #if USE_LOCAL
+    #include <builtin/uniforms/cc-local>
+  #endif
+  #if SAMPLE_FROM_RT
+    #include <common/common-define>
+  #endif
+  in vec3 a_position; in vec2 a_texCoord; in vec4 a_color;
+  out vec2 uv0; out vec2 localPos0; out vec4 color;
+  vec4 vert () {
+    vec4 p=vec4(a_position,1.0);
+    #if USE_LOCAL
+      p=cc_matWorld*p;
+    #endif
+    p=cc_matViewProj*p; uv0=a_texCoord; localPos0=a_position.xy; color=a_color;
+    #if SAMPLE_FROM_RT
+      CC_HANDLE_RT_SAMPLE_FLIP(uv0);
+    #endif
+    return p;
+  }
+}%
+CCProgram sprite-fs %{
+  precision highp float;
+  #include <builtin/internal/embedded-alpha>
+  #include <builtin/internal/alpha-test>
+  in vec2 uv0; in vec2 localPos0; in vec4 color;
+  #pragma builtin(local)
+  layout(set=2,binding=12) uniform sampler2D cc_spriteTexture;
+  uniform sampler2D transitionTexture;
+  uniform Constant {
+    vec4 effectColor; vec4 transitionColor; vec4 gradationColorA; vec4 gradationColorB;
+    vec2 spriteSizeN; vec2 spriteAnchorN;
+    float toneModeN; float toneIntensityN; float colorModeN; float colorIntensityN;
+    float transitionModeN; float transitionRateN; float transitionWidthN; float transitionSoftnessN; float hasTransitionTextureN;
+    float gradationModeN; float angleN; float tilingN; float gradationOffsetN; float widthN; float softnessN; float speedN; float runtimeTimeN; float intensityN; float paddingN;
+    float targetModeN; float targetValueN; float targetRangeN; float targetSoftnessN;
+  };
+  vec3 rgb2hsv(vec3 c) { vec4 K=vec4(0.0,-0.3333333,0.6666667,-1.0); vec4 p=mix(vec4(c.bg,K.wz),vec4(c.gb,K.xy),step(c.b,c.g)); vec4 q=mix(vec4(p.xyw,c.r),vec4(c.r,p.yzx),step(p.x,c.r)); float d=q.x-min(q.w,q.y); return vec3(abs(q.z+(q.w-q.y)/(6.0*d+0.00001)),d/(q.x+0.00001),q.x); }
+  vec3 hsv2rgb(vec3 c) { vec3 p=abs(fract(c.xxx+vec3(0.0,0.6666667,0.3333333))*6.0-3.0); return c.z*mix(vec3(1.0),clamp(p-1.0,0.0,1.0),c.y); }
+  float targetMask(vec3 c) { if(targetModeN<0.5)return 1.0; float v=targetModeN<1.5?rgb2hsv(c).x:dot(c,vec3(0.2126,0.7152,0.0722)); float d=targetModeN<1.5?min(abs(v-targetValueN),1.0-abs(v-targetValueN)):abs(v-targetValueN); return 1.0-smoothstep(targetRangeN,targetRangeN+targetSoftnessN,d); }
+  vec3 tone(vec3 c) { float g=dot(c,vec3(0.2126,0.7152,0.0722)); vec3 r=c; if(toneModeN<1.5)r=vec3(g); else if(toneModeN<2.5)r=vec3(g)*vec3(1.2,1.0,0.75); else if(toneModeN<3.5)r=1.0-c; else if(toneModeN<4.5)r=floor(c*vec3(5.0,6.0,4.0))/vec3(5.0,6.0,4.0); else r=floor(c*4.0)/3.0; return toneModeN<0.5?c:mix(c,r,toneIntensityN); }
+  vec3 colorFilter(vec3 c) { vec3 r=c; if(colorModeN<1.5)r=c*effectColor.rgb; else if(colorModeN<2.5)r=c+effectColor.rgb; else if(colorModeN<3.5)r=c-effectColor.rgb; else if(colorModeN<4.5)r=effectColor.rgb; else if(colorModeN<5.5){vec3 h=rgb2hsv(c);h.x=fract(h.x+effectColor.r);h.yz*=max(effectColor.gb*2.0,vec2(0.001));r=hsv2rgb(h);}else r=(c-0.5)*effectColor.r*2.0+0.5; return colorModeN<0.5?c:mix(c,r,colorIntensityN); }
+  float coordN(vec2 p) { if(gradationModeN<0.5)return p.x; if(gradationModeN<1.5)return p.y; if(gradationModeN<2.5){float r=radians(angleN);return dot(p-0.5,vec2(cos(r),sin(r)))+0.5;} if(gradationModeN<3.5)return length(p-0.5)*1.4142136; float r=radians(angleN);return dot(p-0.5,vec2(cos(r),sin(r)))+0.5; }
+  vec4 frag () {
+    vec4 o=CCSampleWithAlphaSeparated(cc_spriteTexture,uv0)*color;
+    float affected=targetMask(o.rgb)*clamp(intensityN,0.0,1.0);
+    vec3 filtered=colorFilter(tone(o.rgb));
+    vec2 localUv=localPos0/max(spriteSizeN,vec2(0.0001))+spriteAnchorN;
+    float coord=coordN(localUv); float phase=fract(coord*max(tilingN,0.0001)+gradationOffsetN-runtimeTimeN*speedN);
+    float band=1.0-smoothstep(widthN,widthN+max(softnessN,0.0001),abs(phase-0.5));
+    vec3 grad=gradationModeN>3.5?hsv2rgb(vec3(phase,1.0,1.0)):mix(gradationColorA.rgb,gradationColorB.rgb,clamp(coord,0.0,1.0));
+    filtered=mix(filtered,filtered*grad+grad*band,affected);
+    o.rgb=mix(o.rgb,filtered,affected);
+    float maskN=hasTransitionTextureN>0.5?texture(transitionTexture,localUv).a:localUv.x; float rate=clamp(transitionRateN,0.0,1.0); float visible=smoothstep(rate-transitionSoftnessN,rate+transitionSoftnessN,maskN); float edge=1.0-smoothstep(0.0,max(transitionWidthN,0.0001),abs(maskN-rate));
+    if(transitionModeN<0.5)o.a*=1.0-rate; else if(transitionModeN<1.5)o.a*=visible; else if(transitionModeN<2.5){o.rgb=mix(o.rgb,transitionColor.rgb,edge*transitionColor.a*affected);o.a*=visible;} else if(transitionModeN<3.5)o.a*=mix(1.0,maskN,rate); else o.rgb+=transitionColor.rgb*edge*transitionColor.a*affected;
+    ALPHA_TEST(o); return o;
+  }
+}%

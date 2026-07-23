@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"font-marquee","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"11b50e43-45cd-47eb-8bdf-9eb693a6c0f6","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true,"IS_GRAY":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}

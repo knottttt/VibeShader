@@ -1,0 +1,1 @@
+{"__type__":"cc.Material","_name":"ui-marquee","_objFlags":0,"__editorExtras__":{},"_native":"","_effectAsset":{"__uuid__":"0a0e297e-844a-4699-97a6-1f5fd6c6f1dc","__expectedType__":"cc.EffectAsset"},"_techIdx":0,"_defines":[{"USE_TEXTURE":true}],"_states":[{"rasterizerState":{},"depthStencilState":{},"blendState":{"targets":[{}]}}],"_props":[{}]}
