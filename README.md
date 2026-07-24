@@ -6,6 +6,10 @@ VibeShader is an experimental, Codex-assisted port of the well-known Unity open-
 
 The goal is to explore how a production-oriented Unity UI shader system can be reimplemented with Cocos Creator's TypeScript components, Effect assets, materials, and editor preview workflow. This is not an official port and is not affiliated with or endorsed by the original project.
 
+![VibeShader Sprite profiles running in Cocos Creator](docs/images/cocos-uieffect-sprite-profiles.png)
+
+*Sprite profile showcase in the Cocos Creator sample scene.*
+
 ## Important clarification
 
 - This repository is an experiment, not a complete one-to-one migration.

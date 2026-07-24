@@ -6,6 +6,10 @@ VibeShader 是一个由 Codex 辅助完成的实验项目，尝试将 Unity 中�
 
 这个项目主要用于验证：Unity UI Shader 的功能和组织方式，如何用 Cocos Creator 的 TypeScript 组件、Effect、材质以及编辑器预览机制重新实现。它不是原项目的官方移植版本，也与原项目作者没有隶属或授权关系。
 
+![VibeShader 在 Cocos Creator 中运行的 Sprite 效果](docs/images/cocos-uieffect-sprite-profiles.png)
+
+*Cocos Creator 演示场景中的 Sprite Profile 效果。*
+
 ## 需要明确的说明
 
 - 这是一次实验性迁移，不是完整的一比一复刻。
